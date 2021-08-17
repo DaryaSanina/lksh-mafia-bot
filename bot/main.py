@@ -9,7 +9,7 @@ import bot.messages as messages
 
 def read_token() -> str:
     with (Path(__file__).parent / 'token.txt').open() as f:
-        return f.readline()
+        return f.readline().replace('\n', '')
 
 
 def help_handler(update: Update, context: CallbackContext) -> None:
@@ -22,12 +22,7 @@ def create_handler(update: Update, context: CallbackContext) -> None:
     user_id = update.message.chat_id
     user = state.get_user(user_id)
 
-    if user.status == UserStatus.CREATING:
-        update.message.reply_text(messages.ALREADY_CREATING)
-        return
-
-    if user.status in (UserStatus.JOINING, UserStatus.JOINED):
-        user.clear_status()
+    user.clear_status()
 
     user.status = UserStatus.CREATING
     update.message.reply_text(messages.CREATE_HELP)
@@ -37,11 +32,7 @@ def join_handler(update: Update, context: CallbackContext) -> None:
     user_id = update.message.chat_id
     user = state.get_user(user_id)
 
-    if user.status in (UserStatus.JOINING, UserStatus.JOINED):
-        user.clear_status()
-
-    if user.status == UserStatus.CREATING:
-        user.creating_game = None
+    user.clear_status()
 
     user.status = UserStatus.JOINING
     update.message.reply_text(messages.JOIN_HELP)

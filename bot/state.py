@@ -39,8 +39,7 @@ class Game:
                 chat_id=user_id,
                 text=messages.GAME_START.format(role=self.role_by_user_id[user_id])
             )
-            state.get_user(user_id).status = UserStatus.NONE
-            state.get_user(user_id).in_game_id = None
+            state.get_user(user_id).clear_status()
 
 
 class UserStatus(Enum):
@@ -71,10 +70,14 @@ class User:
         self.in_game_id = None
         self.creating_game = None
 
-    def join_game(self, game: Game):
+    def join_game(self, game: Game, update: Update):
         game.joined_user_ids.append(self.user_id)
         self.status = UserStatus.JOINED
         self.in_game_id = game.game_id
+        update.message.reply_text(messages.JOINED_GAME.format(
+            game_id=game.game_id,
+            free_count=len(game.roles) - len(game.joined_user_ids)
+        ))
 
     def clear_status(self):
         if self.in_game_id is not None:
